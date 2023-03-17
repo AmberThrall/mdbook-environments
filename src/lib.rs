@@ -19,12 +19,6 @@ use pulldown_cmark::{CodeBlockKind::*, Event, Options, Parser, Tag, HeadingLevel
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum OnFailure {
-    Bail,
-    Continue,
-}
-
 #[derive(Debug, Clone, Copy)]
 pub struct Counter {
     pub chapter: Option<usize>,
@@ -80,12 +74,6 @@ impl fmt::Display for Counter {
     }
 }
 
-impl Default for OnFailure {
-    fn default() -> Self {
-        Self::Continue
-    }
-}
-
 pub struct EnvPreprocessor<'a> {
     pub environments: Environments<'a>,
 }
@@ -103,9 +91,7 @@ impl<'a> Preprocessor for EnvPreprocessor<'a> {
         "env-preprocessor"
     }
     
-    fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> MdbookResult<Book> {
-        let on_failure = OnFailure::default();
-
+    fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> MdbookResult<Book> {
         let mut res = None;
         book.for_each_mut(|item: &mut BookItem| {
             if let Some(Err(_)) = res {
@@ -113,7 +99,7 @@ impl<'a> Preprocessor for EnvPreprocessor<'a> {
             }
 
             if let BookItem::Chapter(ref mut chapter) = *item {
-                res = Some(self.preprocess(&chapter.content, on_failure).map(|md| {
+                res = Some(self.preprocess(&chapter.content).map(|md| {
                     chapter.content = md;
                 }));
             }
@@ -128,7 +114,7 @@ impl<'a> Preprocessor for EnvPreprocessor<'a> {
 }
 
 impl<'a> EnvPreprocessor<'a> {
-    fn preprocess(&self, content: &str, on_failure: OnFailure) -> MdbookResult<String> {
+    fn preprocess(&self, content: &str) -> MdbookResult<String> {
         let mut opts = Options::empty();
         opts.insert(Options::ENABLE_TABLES);
         opts.insert(Options::ENABLE_FOOTNOTES);
@@ -199,7 +185,7 @@ mod test {
         let mut preprocessor = EnvPreprocessor::default();
         preprocessor.environments.register_builtin(BuiltinEnvironments::Proof);
 
-        preprocessor.preprocess(content, OnFailure::Continue).unwrap()
+        preprocessor.preprocess(content).unwrap()
     }
 
     #[test]

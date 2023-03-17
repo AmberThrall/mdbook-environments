@@ -4,9 +4,6 @@ use anyhow::{anyhow, Result};
 use mdbook::errors::Result as MdbookResult;
 use tinytemplate::TinyTemplate;
 use std::collections::HashMap;
-use serde::ser::{Serialize, SerializeStruct, Serializer, SerializeMap};
-
-use std::error::Error;
 
 pub struct Environment<'a> {
     pub template: &'a str,

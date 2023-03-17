@@ -850,7 +850,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mdbook-enviornments"
+name = "mdbook-environments"
 version = "0.1.0"
 dependencies = [
  "anyhow",

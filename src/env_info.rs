@@ -1,7 +1,5 @@
-use anyhow::{anyhow, Result};
 use mdbook::errors::Result as MdbookResult;
 use regex::Regex;
-use std::collections::HashMap;
 
 const ARGUMENT_REGEX: &str = r#"(?:"(?:\\"|[^"])+"|'(?:\\'|[^'])++'|[^"'\s]+)(?:\s|$)"#;
 
