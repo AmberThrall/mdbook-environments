@@ -76,7 +76,14 @@ impl<'a> Environments<'a> {
                 self.register_builtin(BuiltinEnvironments::Remark);
                 self.register_builtin(BuiltinEnvironments::Definition);
             },
-            BuiltinEnvironments::Center => self.register("center", Environment { template: "<center>{body}</center>", counter_id: None }).unwrap(),
+            BuiltinEnvironments::Center => self.register("center", Environment { 
+                template: r#"<center>
+
+{body}
+
+</center>"#, 
+                counter_id: None 
+            }).unwrap(),
             BuiltinEnvironments::Proof => self.register("proof", Environment { 
                 template: "*Proof.* {body}<p style='width: 100%; text-align: right;'>▯</p>", 
                 counter_id: None 
