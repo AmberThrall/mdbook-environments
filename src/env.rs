@@ -16,6 +16,7 @@ pub struct Environment<'a> {
 pub enum BuiltinEnvironments {
     All,
     Center,
+    Boxed,
     Proof,
     Theorem,
     Lemma,
@@ -69,6 +70,7 @@ impl<'a> Environments<'a> {
         match env {
             BuiltinEnvironments::All => {
                 self.register_builtin(BuiltinEnvironments::Center);
+                self.register_builtin(BuiltinEnvironments::Boxed);
                 self.register_builtin(BuiltinEnvironments::Proof);
                 self.register_builtin(BuiltinEnvironments::Theorem);
                 self.register_builtin(BuiltinEnvironments::Lemma);
@@ -82,6 +84,14 @@ impl<'a> Environments<'a> {
 {body}
 
 </center>"#, 
+                counter_id: None 
+            }).unwrap(),
+            BuiltinEnvironments::Boxed => self.register("boxed", Environment { 
+                template: r#"<div style="width: 100%; padding: 5px; border: 2px solid {{if has_arg.1}}{args.1}{{else}}black{{endif}}; {{if has_arg.0}}background: {args.0}{{endif}};">
+
+{body}
+
+</div>"#, 
                 counter_id: None 
             }).unwrap(),
             BuiltinEnvironments::Proof => self.register("proof", Environment { 

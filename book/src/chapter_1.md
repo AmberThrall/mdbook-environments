@@ -11,6 +11,10 @@ contained within a special environment. Environments provide
 an efficient way to modify blocks of text within your document.
 ```
 
+```boxed "hsl(270, 40%, 94% )" "hsl(270, 40%, 75% )"
+This content is inside a block!
+```
+
 ```definition "Permutative Matrix"
 A matrix \\(P\in M_n(\mathbb{C})\\) is called *permutative* or a *permutative matrix* if
 \\[
