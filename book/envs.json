@@ -1,0 +1,11 @@
+{
+    "environments": {
+        "custom": {
+            "template": "**Custom Template:** {{body}}"
+        },
+        "custom2": {
+            "template": "**Custom {{counter}}.** {{body}}",
+            "counter_id": "custom"
+        }
+    }
+}

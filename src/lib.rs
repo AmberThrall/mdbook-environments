@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate serde;
-extern crate tinytemplate;
 
 mod env_info;
 mod env_block;
@@ -175,44 +174,5 @@ impl<'a> EnvPreprocessor<'a> {
         }
     
         Ok(content)
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    fn prep(content: &str) -> String {
-        let mut preprocessor = EnvPreprocessor::default();
-        preprocessor.environments.register_builtin(BuiltinEnvironments::Proof);
-
-        preprocessor.preprocess(content).unwrap()
-    }
-
-    #[test]
-    fn theorem() {
-        let content = r#"
-```theorem "Theorem Name"
-body
-```
-"#;
-
-        let expected = r#"
-???
-"#;
-        assert_eq!(expected, prep(content));
-    }
-
-    #[test]
-    fn proof() {
-        let content = r#"
-```proof
-The result is trivial.
-```
-"#;
-
-        let expected = r#"
-???
-"#;
-        assert_eq!(expected, prep(content));
     }
 }

@@ -4,6 +4,10 @@ Hello World!
 
 \\[ \mu = \frac{1}{N} \sum_{i=0} x_i \\]
 
+```custom
+Hello World!
+```
+
 ```center
 This is a demonstration of the *center* environment. 
 This paragraph of text will be *centred* because it is 
@@ -35,6 +39,10 @@ The matrix from the eigenvector of (3) given by
 S = \begin{bmatrix} e & v_2 & v_3 & \dots & v_n \end{bmatrix},
 \\]
 where \\(n\ge2\\), is invertible whenever \\(x\ge0\\) and \\(x_1\ne\Sigma\\).
+```
+
+```custom2
+Hello World!
 ```
 
 ```proof

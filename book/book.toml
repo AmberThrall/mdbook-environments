@@ -9,4 +9,4 @@ title = "Book"
 mathjax-support = true
 
 [preprocessor.enviornments]
-command = "cargo run"
+command = "cargo run -- -c envs.json"

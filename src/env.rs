@@ -2,12 +2,22 @@ use super::EnvBlock;
 use super::Counter;
 use anyhow::{anyhow, Result};
 use mdbook::errors::Result as MdbookResult;
-use tinytemplate::TinyTemplate;
+use upon::Engine;
 use std::collections::HashMap;
+use serde::{Serialize};
 
-pub struct Environment<'a> {
-    pub template: &'a str,
+pub struct Environment {
+    pub template: String,
     pub counter_id: Option<String>,
+}
+
+impl Environment {
+    pub fn new(template: &str, counter_id: Option<&str>) -> Self {
+        Self {
+            template: String::from(template),
+            counter_id: counter_id.map(|x| String::from(x)),
+        }
+    }
 }
 
 pub enum BuiltinEnvironments {
@@ -32,22 +42,22 @@ struct Context {
 }
 
 pub struct Environments<'a> {
-    tt: TinyTemplate<'a>,
-    envs: HashMap<String, Environment<'a>>,
+    engine: Engine<'a>,
+    envs: HashMap<String, Environment>,
 }
 
 impl<'a> Default for Environments<'a> {
     fn default() -> Self {
         Self {
-            tt: TinyTemplate::new(),
+            engine: Engine::new(),
             envs: HashMap::new(),
         }
     }
 }
 
 impl<'a> Environments<'a> {
-    pub fn register(&mut self, name: &'a str, env: Environment<'a>) -> Result<(), tinytemplate::error::Error> {
-        self.tt.add_template(name, &env.template)?;
+    pub fn register(&mut self, name: &str, env: Environment) -> Result<(), Box<dyn std::error::Error>> {
+        self.engine.add_template(String::from(name), env.template.clone()).unwrap();
         self.envs.insert(String::from(name), env);
         Ok(())
     }
@@ -75,46 +85,46 @@ impl<'a> Environments<'a> {
                 self.register_builtin(BuiltinEnvironments::Remark);
                 self.register_builtin(BuiltinEnvironments::Definition);
             },
-            BuiltinEnvironments::Center => self.register("center", Environment { 
-                template: r#"<center>
+            BuiltinEnvironments::Center => self.register("center", Environment::new(
+r#"<center>
 
-{body}
+{{body}}
 
 </center>"#, 
-                counter_id: None 
-            }).unwrap(),
-            BuiltinEnvironments::Boxed => self.register("boxed", Environment { 
-                template: r#"<div style="width: 100%; padding: 5px; border: 2px solid {{if has_arg.1}}{args.1}{{else}}black{{endif}}; {{if has_arg.0}}background: {args.0}{{endif}};">
+                None 
+            )).unwrap(),
+            BuiltinEnvironments::Boxed => self.register("boxed", Environment::new(
+r#"<div style="width: 100%; padding: 5px; border: 2px solid {%if has_arg.1%}{{args.1}}{%else%}black{%endif%}; {%if has_arg.0%}background: {{args.0}}{%endif%};">
 
-{body}
+{{body}}
 
 </div>"#, 
-                counter_id: None 
-            }).unwrap(),
-            BuiltinEnvironments::Proof => self.register("proof", Environment { 
-                template: "*Proof.* {body}<p style='width: 100%; text-align: right;'>▯</p>", 
-                counter_id: None 
-            }).unwrap(),
-            BuiltinEnvironments::Theorem => self.register("theorem", Environment { 
-                template: "{{if has_arg.0}}**Theorem {counter}** ({args.0})**.**{{else}}**Theorem {counter}.**{{endif}} *{body}*", 
-                counter_id: Some("theorem".to_string()), 
-            }).unwrap(),
-            BuiltinEnvironments::Lemma => self.register("lemma", Environment { 
-                template: "{{if has_arg.0}}**Lemma {counter}** ({args.0})**.**{{else}}**Lemma {counter}.**{{endif}} *{body}*", 
-                counter_id: Some("theorem".to_string()), 
-            }).unwrap(),
-            BuiltinEnvironments::Proposition => self.register("proposition", Environment { 
-                template: "{{if has_arg.0}}**Proposition {counter}** ({args.0})**.**{{else}}**Proposition {counter}.**{{endif}} *{body}*", 
-                counter_id: Some("theorem".to_string()), 
-            }).unwrap(),            
-            BuiltinEnvironments::Remark => self.register("remark", Environment { 
-                template: "{{if has_arg.0}}**Remark {counter}** ({args.0})**.**{{else}}**Remark {counter}.**{{endif}} {body}", 
-                counter_id: Some("theorem".to_string()), 
-            }).unwrap(),
-            BuiltinEnvironments::Definition => self.register("definition", Environment { 
-                template: "{{if has_arg.0}}**Definition {counter}** ({args.0})**.**{{else}}**Definition {counter}.**{{endif}} {body}", 
-                counter_id: Some("theorem".to_string()), 
-            }).unwrap(),
+                None 
+            )).unwrap(),
+            BuiltinEnvironments::Proof => self.register("proof", Environment::new(
+                "*Proof.* {{body}}<p style='width: 100%; text-align: right;'>▯</p>", 
+                None 
+            )).unwrap(),
+            BuiltinEnvironments::Theorem => self.register("theorem", Environment::new(
+                "{%if has_arg.0%}**Theorem {{counter}}** ({{args.0}})**.**{%else%}**Theorem {{counter}}.**{%endif%} *{{body}}*", 
+                Some("theorem"), 
+            )).unwrap(),
+            BuiltinEnvironments::Lemma => self.register("lemma", Environment::new(
+                "{%if has_arg.0%}**Lemma {{counter}}** ({{args.0}})**.**{%else%}**Lemma {{counter}}.**{%endif%} *{{body}}*", 
+                Some("theorem"), 
+            )).unwrap(),
+            BuiltinEnvironments::Proposition => self.register("proposition", Environment::new(
+                "{%if has_arg.0%}**Proposition {{counter}}** ({{args.0}})**.**{%else%}**Proposition {{counter}}.**{%endif%} *{{body}}*", 
+                Some("theorem"), 
+            )).unwrap(),            
+            BuiltinEnvironments::Remark => self.register("remark", Environment::new(
+                "{%if has_arg.0%}**Remark {{counter}}** ({{args.0}})**.**{%else%}**Remark {{counter}}.**{%endif%} *{{body}}*", 
+                Some("theorem"), 
+            )).unwrap(),
+            BuiltinEnvironments::Definition => self.register("definition", Environment::new( 
+                "{%if has_arg.0%}**Definition {{counter}}** ({{args.0}})**.**{%else%}**Definition {{counter}}.**{%endif%} *{{body}}*", 
+                Some("theorem"), 
+            )).unwrap(),
         }
     }
 
@@ -135,6 +145,7 @@ impl<'a> Environments<'a> {
             body: block.body.clone(),
             counter: format!("{}", counter),
         };
-        self.tt.render(&block.info.name, &context).map_err(|e| anyhow!("Render error occurred: {}", e))
+        let template = self.engine.get_template(&block.info.name).ok_or(anyhow!("Render error occured: failed to find environment named `{}`", block.info.name))?;
+        template.render(&context).map_err(|e| anyhow!("Render error occurred: {}", e))
     }
 }
